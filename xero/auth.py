@@ -120,7 +120,6 @@ class PublicCredentials(object):
         # These are not strictly used by Public Credentials, but
         # are reserved for use by other credentials (i.e. Partner)
         self.rsa_key = None
-        self.client_cert = None
         self.oauth_session_handle = None
 
         self._init_credentials(oauth_token, oauth_token_secret)
@@ -152,7 +151,7 @@ class PublicCredentials(object):
             )
 
             url = self.base_url + REQUEST_TOKEN_URL
-            response = requests.post(url=url, auth=oauth, cert=self.client_cert)
+            response = requests.post(url=url, auth=oauth)
             self._process_oauth_response(response)
 
     def _init_oauth(self, oauth_token, oauth_token_secret):
@@ -266,7 +265,7 @@ class PublicCredentials(object):
 
         # Make the verification request, gettiung back an access token
         url = self.base_url + ACCESS_TOKEN_URL
-        response = requests.post(url=url, auth=oauth, cert=self.client_cert)
+        response = requests.post(url=url, auth=oauth)
         self._process_oauth_response(response)
         self.verified = True
 
@@ -311,10 +310,6 @@ class PartnerCredentials(PublicCredentials):
 
         >>> rsa_key = "-----BEGIN RSA PRIVATE KEY----- ..."
 
-     2) You'll need to pass a tuple to the Entrust certificate pair.
-
-        >>> client_cert = ('/path/to/entrust-cert.pem',
-                           '/path/to/entrust-private-nopass.pem')
 
      3) Once a token has expired, you can refresh it to get another 30 mins
 
@@ -329,7 +324,7 @@ class PartnerCredentials(PublicCredentials):
         oauth_authorization_expires_at tells when the overall access
         permissions expire (~10 year window)
     """
-    def __init__(self, consumer_key, consumer_secret, rsa_key, client_cert,
+    def __init__(self, consumer_key, consumer_secret, rsa_key, 
                  callback_uri=None, verified=False,
                  oauth_token=None, oauth_token_secret=None,
                  oauth_expires_at=None, oauth_authorization_expires_at=None,
@@ -353,7 +348,6 @@ class PartnerCredentials(PublicCredentials):
         self.base_url = XERO_PARTNER_BASE_URL
 
         self.rsa_key = rsa_key
-        self.client_cert = client_cert
         self.oauth_session_handle = oauth_session_handle
 
         self._init_credentials(oauth_token, oauth_token_secret)
@@ -374,5 +368,5 @@ class PartnerCredentials(PublicCredentials):
         # Make the verification request, getting back an access token
         params = {'oauth_session_handle': self.oauth_session_handle}
         response = requests.post(url=self.base_url + ACCESS_TOKEN_URL,
-                params=params, auth=oauth, cert=self.client_cert)
+                params=params, auth=oauth)
         self._process_oauth_response(response)
